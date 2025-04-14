@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voetbal Koppen Kennis</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Voetbal Koppen Kennis</h1>
+    </header>
+    
+    <!-- Audio elementen voor geluidseffecten -->
+    <audio id="correctSound" src="sounds/correct.mp3" preload="auto"></audio>
+    <audio id="incorrectSound" src="sounds/incorrect.mp3" preload="auto"></audio>
+    
+    <main class="game-container">
+        <aside class="sidebar">
+            <div id="clubSelection">
+                <label for="club">Kies een club</label>
+                <select id="club" class="club-dropdown" onchange="loadPlayers()">
+                    <option value="">Selecteer een club</option>
+                    <option value="AZ">AZ</option>
+                    <option value="Ajax">Ajax</option>
+                    <option value="Almere">Almere</option>
+                    <option value="Groningen">Groningen</option>
+                    <option value="Twente">Twente</option>
+                    <option value="Utrecht">Utrecht</option>
+                    <option value="Feyenoord">Feyenoord</option>
+                    <option value="Fortuna">Fortuna</option>
+                    <option value="gae">Go Ahead Eagles</option>
+                    <option value="Heracles">Heracles</option>
+                    <option value="nec">NEC</option>
+                    <option value="nac">NAC</option>
+                    <option value="pec">Pec Zwolle</option>
+                    <option value="psv">PSV</option>
+                    <option value="rkc">RKC</option>
+                    <option value="Sparta">Sparta</option>
+                    <option value="Willem2">Willem II</option>
+                    <option value="Heerenveen">Heerenveen</option>
+                </select>
+            </div>
+
+            <div id="gameModes" class="hidden">
+                <h4>Games</h4>
+                <button id="nameModeButton" disabled onclick="startNameMode()">Raad de Naam</button>
+                <button id="photoModeButton" disabled onclick="startPhotoMode()">Raad de Foto</button>
+                <button id="allPlayersButton" disabled onclick="showAllPlayers()">Bekijk alle spelers</button>
+            </div>
+        </aside>
+
+        <section class="game-content">
+            <div class="game-left-panel">
+                <div id="gameArea"></div>
+            </div>
+            <div class="game-right-panel">
+                <div id="result" class="hidden"></div>
+                <button id="nextButton" class="hidden" onclick="nextQuestion()">Volgende Vraag</button>
+            </div>
+        </section>
+    </main>
+    
+    <script src="script.js"></script>
+</body>
+</html> 
