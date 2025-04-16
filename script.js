@@ -2,56 +2,56 @@ const players = []; // Lege array voor spelers
 
 const playerFiles = {
     AZ: [
-        "AZ-AlexandrePenetra.jpeg",
-        "AZ-Berkhout.jpeg",
-        "AZ-BrunoMartinsIndi.jpeg",
-        "AZ-Dekker.jpeg",
-        "AZ-DeWit.jpeg",
-        "AZ-Dijkstra.jpeg",
-        "AZ-ErnestPoku.jpeg",
-        "AZ-JaydenAddai.jpeg",
-        "AZ-Kasius.jpeg",
-        "AZ-Maikuma.jpeg",
-        "AZ-Mollerwolfe.jpeg",
-        "AZ-RubenVanBommel.jpeg",
-        "AZ-TroyParrot.jpeg",
-        "AZ-WouterGoes.jpeg"
+        "az-alexandrepenetra.jpeg",
+        "az-berkhout.jpeg",
+        "az-brunomartinsindi.jpeg",
+        "az-dekker.jpeg",
+        "az-dewit.jpeg",
+        "az-dijkstra.jpeg",
+        "az-ernestpoku.jpeg",
+        "az-jaydenaddai.jpeg",
+        "az-kasius.jpeg",
+        "az-maikuma.jpeg",
+        "az-mollerwolfe.jpeg",
+        "az-rubenvanbommel.jpeg",
+        "az-troyparrot.jpeg",
+        "az-woutergoes.jpeg"
     ],
     Ajax: [
-        "AJAX-AxcelDongen.jpeg",
-        "AJAX-Baas.jpeg",
-        "AJAX-Berghuis.jpeg",
-        "AJAX-BertrandTraore.jpeg",
-        "AJAX-Boomen.jpeg",
-        "AJAX-bounida.jpeg",
-        "AJAX-BrianBrobbey.jpeg",
-        "AJAX-CharlieSetford.jpeg",
-        "AJAX-CoachFaroli.jpeg",
-        "AJAX-DanieleRugani.jpeg",
-        "AJAX-DiesJanse.jpeg",
-        "AJAX-Edvardsen.jpeg",
-        "AJAX-Faberski.jpeg",
-        "AJAX-FitzJim.jpeg",
-        "AJAX-Gaaei.jpeg",
-        "AJAX-Godts.jpeg",
-        "AJAX-Gorter.jpeg",
-        "AJAX-Hato.jpeg",
-        "AJAX-JordanHenderson.jpeg",
-        "AJAX-Kaplan.jpeg",
-        "AJAX-konadu.jpeg",
-        "AJAX-Matheus.jpeg",
-        "AJAX-Mokio.jpeg",
-        "AJAX-OwenWijndal.jpeg",
-        "AJAX-Rasmussen.jpeg",
-        "AJAX-RemkoPasveer.jpeg",
-        "AJAX-Rijkhoff.jpeg",
-        "AJAX-Rosa.jpeg",
-        "AJAX-Steur.jpeg",
-        "AJAX-Sutalo.jpeg",
-        "AJAX-Taylor.jpeg",
-        "AJAX-Ugwu.jpeg",
-        "AJAX-Verschuren.jpeg",
-        "AJAX-WoutWeghorst.jpeg"
+        "ajax-axceldongen.jpeg",
+        "ajax-baas.jpeg",
+        "ajax-berghuis.jpeg",
+        "ajax-bertrandtraore.jpeg",
+        "ajax-boomen.jpeg",
+        "ajax-bounida.jpeg",
+        "ajax-brianbrobbey.jpeg",
+        "ajax-charliesetford.jpeg",
+        "ajax-coachfaroli.jpeg",
+        "ajax-danielerugani.jpeg",
+        "ajax-diesjanse.jpeg",
+        "ajax-edvardsen.jpeg",
+        "ajax-faberski.jpeg",
+        "ajax-fitzjim.jpeg",
+        "ajax-gaaei.jpeg",
+        "ajax-godts.jpeg",
+        "ajax-gorter.jpeg",
+        "ajax-hato.jpeg",
+        "ajax-jordanhenderson.jpeg",
+        "ajax-kaplan.jpeg",
+        "ajax-konadu.jpeg",
+        "ajax-matheus.jpeg",
+        "ajax-mokio.jpeg",
+        "ajax-owenwijndal.jpeg",
+        "ajax-rasmussen.jpeg",
+        "ajax-remkopasveer.jpeg",
+        "ajax-rijkhoff.jpeg",
+        "ajax-rosa.jpeg",
+        "ajax-steur.jpeg",
+        "ajax-sutalo.jpeg",
+        "ajax-taylor.jpeg",
+        "ajax-ugwu.jpeg",
+        "ajax-verschuren.jpeg",
+        "ajax-woutweghorst.jpeg"
     ],
     Feyenoord: [
         "Feyenoord-QuintenTimber.jpeg",
@@ -144,10 +144,14 @@ const playerFiles = {
     // Voeg meer clubs en spelers toe op dezelfde manier...
 };
 
+// Google Sheets API configuratie
+const SPREADSHEET_ID = '19anq-tNavonJtdRdkFKLFxFNYHABHmItjiTddNMJr0Q';
+const API_KEY = 'AIzaSyBF-mVtqQLw-YcpQUmCw1PhHw4KXya_g24';
+const SHEET_NAME = 'Spelers';
+const GITHUB_PAGES_URL = 'https://jerrygits.github.io/KoppenKennis2/images';
 
-
-// Functie om spelers te laden uit de geselecteerde club
-function loadPlayers() {
+// Functie om spelers op te halen uit Google Sheets
+async function loadPlayers() {
     const clubSelect = document.getElementById('club');
     const club = clubSelect.value;
     const nameModeButton = document.getElementById('nameModeButton');
@@ -161,45 +165,63 @@ function loadPlayers() {
     hideNextButton();
 
     if (!club) {
-        // Als er geen club is geselecteerd, toon het Eredivisie-logo
         showEredivisieLogo();
         gameModes.classList.add('hidden');
         return;
     }
 
-    const imagePath = `images/${club}/`;
-    const filenames = playerFiles[club] || [];
+    try {
+        // Haal de data op uit Google Sheets
+        const response = await fetch(`https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${SHEET_NAME}?key=${API_KEY}`);
+        const data = await response.json();
+        
+        // Verwerk de data
+        const rows = data.values;
+        const headers = rows[0];
+        
+        const columnIndex = {
+            voornaam: headers.indexOf('Voornaam'),
+            achternaam: headers.indexOf('Achternaam'),
+            club: headers.indexOf('Club'),
+            bestandsnaam: headers.indexOf('Bestandsnaam'),
+            rugnummer: headers.indexOf('Rugnummer'),
+            positie: headers.indexOf('Positie'),
+            geboortedatum: headers.indexOf('Geboortedatum')
+        };
 
-    players.length = 0;
-
-    filenames.forEach(filename => {
-        try {
-            const [clubPart, namePartWithExt] = filename.split('-');
-            const namePart = namePartWithExt.split('.')[0];
-            const playerName = parsePlayerName(namePart);
-            players.push({ 
-                name: playerName, 
-                image: `${imagePath}${filename}`
-            });
-        } catch (error) {
-            console.warn(`Kon bestand niet verwerken: ${filename}`);
+        // Filter spelers op club en maak player objecten
+        players.length = 0;
+        for (let i = 1; i < rows.length; i++) {
+            const row = rows[i];
+            if (row[columnIndex.club] === club) {
+                const bestandsnaam = row[columnIndex.bestandsnaam];
+                players.push({
+                    name: `${row[columnIndex.voornaam]} ${row[columnIndex.achternaam]}`,
+                    image: `${GITHUB_PAGES_URL}/${club.toLowerCase()}/${bestandsnaam}`,
+                    rugnummer: row[columnIndex.rugnummer],
+                    positie: row[columnIndex.positie],
+                    geboortedatum: row[columnIndex.geboortedatum]
+                });
+            }
         }
-    });
 
-    const hasPlayers = players.length > 0;
-    
-    // Update de status van de knoppen en game modes
-    if (hasPlayers) {
-        gameModes.classList.remove('hidden');
-        nameModeButton.disabled = false;
-        photoModeButton.disabled = false;
-        allPlayersButton.disabled = false;
-        showClubWelcome(club);
-    } else {
-        gameModes.classList.add('hidden');
-        nameModeButton.disabled = true;
-        photoModeButton.disabled = true;
-        allPlayersButton.disabled = true;
+        const hasPlayers = players.length > 0;
+        
+        if (hasPlayers) {
+            gameModes.classList.remove('hidden');
+            nameModeButton.disabled = false;
+            photoModeButton.disabled = false;
+            allPlayersButton.disabled = false;
+            showClubWelcome(club);
+        } else {
+            gameModes.classList.add('hidden');
+            nameModeButton.disabled = true;
+            photoModeButton.disabled = true;
+            allPlayersButton.disabled = true;
+            showEredivisieLogo();
+        }
+    } catch (error) {
+        console.error('Fout bij het ophalen van de data:', error);
         showEredivisieLogo();
     }
 }
@@ -301,13 +323,13 @@ function showRandomName() {
                 <span>Wie van deze 4 spelers is</span>
                 <span>${currentPlayer.name}?</span>
             </h2>
-            <div class="photo-grid">
-                ${options.map(player => `
-                    <div class="photo-option" onclick="checkPhotoGuess('${player.name}')">
-                        <img src="${player.image}" alt="Voetballer">
-                    </div>
-                `).join('')}
-            </div>
+        <div class="photo-grid">
+            ${options.map(player => `
+                <div class="photo-option" onclick="checkPhotoGuess('${player.name}')">
+                    <img src="${player.image}" alt="Voetballer">
+                </div>
+            `).join('')}
+        </div>
         </div>
     `;
     
@@ -412,13 +434,33 @@ function shuffleArray(array) {
     return array;
 } 
 
-function parsePlayerName(compoundName) {
-    for (let i = 1; i < compoundName.length; i++) {
-        if (compoundName[i] === compoundName[i].toUpperCase()) {
-            return compoundName.slice(0, i) + " " + compoundName.slice(i);
-        }
+function parsePlayerName(filename) {
+    // Verwijder de extensie en club prefix
+    const namePart = filename.split('.')[0].split('-')[1];
+    
+    // Splits de naam op basis van hoofdletters
+    const words = namePart.split(/(?=[A-Z])/);
+    
+    // Verwerk speciale gevallen
+    if (words.length === 1) {
+        // Als er maar één woord is, maak de eerste letter hoofdletter
+        return words[0].charAt(0).toUpperCase() + words[0].slice(1).toLowerCase();
     }
-    return compoundName; // fallback: hele naam als geen tweede hoofdletter
+    
+    // Verwerk dubbele achternamen (bijv. VanBommel)
+    const processedWords = words.map((word, index) => {
+        // Als het woord begint met 'Van', 'De', 'Der', 'Den', etc.
+        if (word.toLowerCase().startsWith('van') || 
+            word.toLowerCase().startsWith('de') || 
+            word.toLowerCase().startsWith('der') || 
+            word.toLowerCase().startsWith('den')) {
+            return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        }
+        // Voor andere woorden
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+    });
+    
+    return processedWords.join(' ');
 }
 
 function showAllPlayers() {
